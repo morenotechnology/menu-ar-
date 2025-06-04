@@ -5,7 +5,8 @@ const productos = {
   1: {
     nombre: 'Double Whopper',
     descripcion: 'Combo con hamburguesa doble, queso y papas',
-    modelo: '/assets/double_whopper_hamburger_value_meal.glb'
+    modelo: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb'
+
   }
 };
 

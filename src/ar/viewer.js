@@ -1,33 +1,9 @@
-window.loadARScene = async function(modeloURL) {
-  const mindarThree = new window.MINDAR.IMAGE.MindARThree({
-    container: document.querySelector("#viewer-container"),
-    imageTargetSrc: "/assets/targets.mind",
-  });
-
-  const { renderer, scene, camera } = mindarThree;
-  const anchor = mindarThree.addAnchor(0);
-  const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
-  scene.add(light);
-
-  const loader = new THREE.GLTFLoader();
-  loader.load(modeloURL, (gltf) => {
-    const model = gltf.scene;
-    model.scale.set(0.3, 0.3, 0.3);
-    model.traverse((c) => {
-      if (c.isMesh) c.material.side = THREE.DoubleSide;
-    });
-    anchor.group.add(model);
-  });
-
-  await mindarThree.start();
-  renderer.setAnimationLoop(() => {
-    renderer.render(scene, camera);
-  });
-};
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
 window.load3DViewer = function(modeloURL) {
   const container = document.querySelector("#viewer-container");
-  container.innerHTML = ""; // limpiar antes
+  container.innerHTML = "";
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
@@ -35,20 +11,34 @@ window.load3DViewer = function(modeloURL) {
   renderer.setSize(container.clientWidth, container.clientHeight);
   container.appendChild(renderer.domElement);
 
-  const light = new THREE.HemisphereLight(0xffffff, 0x444444, 1);
-  scene.add(light);
+  // Luz
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 1));
+  scene.add(new THREE.AmbientLight(0xffffff, 0.6));
 
-  const loader = new THREE.GLTFLoader();
+  const loader = new GLTFLoader();
   loader.load(modeloURL, (gltf) => {
     const model = gltf.scene;
-    model.scale.set(0.3, 0.3, 0.3);
+
+    model.scale.set(1, 1, 1);
     model.position.set(0, -0.5, 0);
+
+    model.traverse((child) => {
+      if (child.isMesh) {
+        child.material.side = THREE.DoubleSide;
+        if (!child.material.color) {
+          child.material.color = new THREE.Color(0xff9900);
+        }
+      }
+    });
+
     scene.add(model);
+  }, undefined, (err) => {
+    console.error("❌ Error cargando modelo:", err);
   });
 
   camera.position.z = 2;
 
-  const animate = function () {
+  const animate = () => {
     requestAnimationFrame(animate);
     renderer.render(scene, camera);
   };
